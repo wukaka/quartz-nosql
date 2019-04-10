@@ -7,6 +7,9 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.LinkedList;
+import java.util.List;
+
 @Slf4j
 @Configuration
 public class InitConfig implements ApplicationListener<ApplicationReadyEvent>{
@@ -17,9 +20,22 @@ public class InitConfig implements ApplicationListener<ApplicationReadyEvent>{
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
         try {
-            scheduleService.schedule();
+            initTimerList();
         } catch (Exception e) {
             log.error("init config error", e);
+        }
+    }
+
+
+    private void initTimerList() {
+        try {
+            List<String> params = new LinkedList<>();
+            for (int i= 0; i < 10; i++){
+                params.add("timer param " + i);
+            }
+            scheduleService.initScheduleList(params);
+        }catch (Exception e){
+            log.error("init timer error", e);
         }
     }
 }
