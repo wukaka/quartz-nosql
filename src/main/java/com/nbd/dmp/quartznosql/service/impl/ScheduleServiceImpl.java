@@ -1,5 +1,6 @@
 package com.nbd.dmp.quartznosql.service.impl;
 
+import com.nbd.dmp.quartznosql.bean.ScheduleTimerPa;
 import com.nbd.dmp.quartznosql.service.ScheduleService;
 import com.nbd.dmp.quartznosql.timer.SortedTimer;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,7 +29,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         String group = SortedTimer.class.getName();
 
-        ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/5 * * * * ?");
+        ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/40 * * * * ?");
 
         JobDetail jobDetail = JobBuilder.newJob(SortedTimer.class).withIdentity(name, group).build();
 
@@ -43,7 +45,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             try {
                 String name = UUID.randomUUID().toString();
                 String group = SortedTimer.class.getName();
-                ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/5 * * * * ?");
+                ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/40 * * * * ?");
                 JobDetail jobDetail = JobBuilder.newJob(SortedTimer.class).withIdentity(name, group).build();
                 jobDetail.getJobDataMap().put("key", param);
                 Trigger trigger = TriggerBuilder.newTrigger().withIdentity(name, group).withSchedule(scheduleBuilder).build();
@@ -57,18 +59,28 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
     @Override
-    public void jobList() throws Exception {
+    public List<ScheduleTimerPa> jobList() throws Exception {
+        List<ScheduleTimerPa> resultList = new LinkedList<>();
         for (String groupName : scheduler.getJobGroupNames()) {
             for (JobKey jobKey : scheduler.getJobKeys(GroupMatcher.jobGroupEquals(groupName))) {
                 String jobName = jobKey.getName();
                 String jobGroup = jobKey.getGroup();
                 List<Trigger> triggerList = (List<Trigger>) scheduler.getTriggersOfJob(jobKey);
-                Date nextFireTime = triggerList.get(0).getNextFireTime();
-                log.info("Job : " + jobName + ", Group : "
-                        + jobGroup + ", Next execution time : "
-                        + nextFireTime);
+
+                Trigger firstTrigger = triggerList.get(0);
+
+                for (Trigger trigger : triggerList) {
+                    Date nextFireTime = trigger.getNextFireTime();
+                    TriggerKey triggerKey = trigger.getKey();
+                    log.info("Job : " + jobName + ", Group : "
+                            + jobGroup + ", Next execution time : "
+                            + nextFireTime);
+                    resultList.add(new ScheduleTimerPa(groupName, jobKey, triggerKey));
+                }
+
             }
         }
+        return resultList;
     }
 
 }
