@@ -1,2 +1,17 @@
 server:
   port: 10010
+
+nbd:
+  quartz:
+    jobStore:
+      mongoUri: mongodb://172.19.23.178:27017
+      class: com.novemberain.quartz.mongodb.MongoDBJobStore
+      dbName: quartz
+      collectionPrefix: quartz_
+      isClustered: true
+    threadPool:
+      threadCount: 1
+    scheduler:
+      skipUpdateCheck: true
+      instanceId: AUTO
+      instanceName: quartzMongoInstance
