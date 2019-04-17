@@ -13,6 +13,5 @@ public class SortedTimer extends QuartzJobBean{
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         JobDataMap jobDataMap = jobExecutionContext.getJobDetail().getJobDataMap();
         log.info("种子定时任务 {}",jobDataMap.get("key"));
-
     }
 }

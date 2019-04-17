@@ -2,14 +2,13 @@ package com.nbd.dmp.quartznosql.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.spi.JobFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
-import javax.sql.DataSource;
 import java.util.Properties;
 
 @Slf4j
@@ -18,6 +17,10 @@ public class QuartzConfig {
 
     private static final String CONTEXT_KEY = "applicationContext";
     private static final String PROPERTIES_QUARTZ_KEY = "quartz.properties";
+
+
+    @Autowired
+    private ApplicationContext applicationContext;
 
 
     @Value("${nbd.quartz.jobStore.mongoUri}")
@@ -47,8 +50,7 @@ public class QuartzConfig {
     @Value("${nbd.quartz.scheduler.instanceName}")
     private String instanceName;
 
-    @Bean
-    public JobFactory jobFactory(ApplicationContext applicationContext) {
+    private JobFactory jobFactory(ApplicationContext applicationContext) {
         AutowiringSpringBeanJobFactory jobFactory = new AutowiringSpringBeanJobFactory();
         jobFactory.setApplicationContext(applicationContext);
         return jobFactory;
@@ -57,6 +59,7 @@ public class QuartzConfig {
     @Bean
     public SchedulerFactoryBean schedulerFactoryBean() {
         SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
+        factoryBean.setJobFactory(jobFactory(applicationContext));
         factoryBean.setOverwriteExistingJobs(true);
         factoryBean.setStartupDelay(2);
         factoryBean.setAutoStartup(true);
@@ -71,7 +74,6 @@ public class QuartzConfig {
         quartzProperties.setProperty("org.quartz.scheduler.instanceId", String.valueOf(instanceId));
         quartzProperties.setProperty("org.quartz.scheduler.instanceName", instanceName);
         factoryBean.setQuartzProperties(quartzProperties);
-//        factoryBean.setConfigLocation(new ClassPathResource(PROPERTIES_QUARTZ_KEY));
         return factoryBean;
     }
 

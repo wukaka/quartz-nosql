@@ -6,6 +6,7 @@ import com.nbd.dmp.quartznosql.timer.SortedTimer;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -43,6 +44,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     public void initScheduleList(List<String> params) throws Exception {
         for (String param : params) {
             try {
+
                 String name = UUID.randomUUID().toString();
                 String group = SortedTimer.class.getName();
                 ScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule("0/40 * * * * ?");
